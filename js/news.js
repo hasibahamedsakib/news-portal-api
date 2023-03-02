@@ -39,7 +39,7 @@ const showAllNews = (data, name) => {
   const newsContainer = getElement("allNewsContainer");
   newsContainer.innerHTML = "";
   data.forEach((news) => {
-    const { image_url, title, details, author, total_view, rating } = news;
+    const { image_url, title, details, author, total_view, rating, _id } = news;
     const div = document.createElement("div");
     div.classList.add("card", "mb-4", "p-4");
     div.innerHTML = `
@@ -79,7 +79,7 @@ const showAllNews = (data, name) => {
             <i class="fa-solid fa-star-half-stroke"></i>
             </div>
 
-            <button type="button" class="btn btn-outline-primary fs-5 fw-bolder">
+            <button onclick="singleData('${_id}')" type="button" class="btn btn-outline-primary fs-5 fw-bolder" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
             &rightarrow;
           </button>
         </div>
@@ -87,6 +87,41 @@ const showAllNews = (data, name) => {
     </div>
         
    `;
+
     newsContainer.appendChild(div);
   });
+};
+
+// show modal data
+const singleData = (news_id) => {
+  fetchApi(`https://openapi.programming-hero.com/api/news/${news_id}`).then(
+    (data) => showSingleData(data.data)
+  );
+};
+
+const showSingleData = (data) => {
+  console.log(data);
+  const { title, details, thumbnail_url, others_info, author } = data[0];
+  getElement("staticBackdropLabel").innerHTML = `
+  ${title} <span class="badge rounded-pill text-bg-warning">${
+    others_info.is_trending ? "News Trending" : "Not Trending"
+  }</span>
+  `;
+  const modalBody = getElement("modalBody");
+  const modalFooter = getElement("modal-footer");
+  modalBody.innerText = "";
+  modalFooter.innerText = "";
+  modalBody.innerHTML += `
+  <div class="col-md-12 pe-4 ">
+  <img src="${thumbnail_url}" class="img-fluid rounded-start h-100" alt="...">
+  <p class=" fs-5 text-justify">${details}</p>
+   
+</div>
+  `;
+  modalFooter.innerHTML += `
+<p>${
+    others_info.is_trending ? "This News are trending" : "Not Trending ..."
+  }</p>
+   <small>Publishing Date : ${author.published_date}</small>
+`;
 };
